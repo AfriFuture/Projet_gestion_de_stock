@@ -1,0 +1,17 @@
+INVOICE #1
+Client: SDG hello
+Date: 2025-06-11
+
+Product              Qty        UnitPrice    Total       
+Souris optique       2          7000,00      14000,00    
+Écran 24 pouces      2          75000,00     150000,00   
+Bouteille d'eau      2          500,00       1000,00     
+Stylo bleu           2          200,00       400,00      
+Clavier mécanique    2          15000,00     30000,00    
+Souris optique       2          7000,00      14000,00    
+Écran 24 pouces      3          75000,00     225000,00   
+Bouteille d'eau      2          500,00       1000,00     
+Stylo bleu           3          200,00       600,00      
+Segement-pixel-learn-test 3          43344,00     130032,00   
+
+TOTAL: 566032.00 FCFA

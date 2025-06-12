@@ -1,0 +1,8 @@
+INVOICE #3
+Client: sddf2
+Date: 2025-06-11
+
+Product              Qty        UnitPrice    Total       
+Souris optique       1          7000,00      7000,00     
+
+TOTAL: 7000.00 FCFA

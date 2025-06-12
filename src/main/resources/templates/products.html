@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Product Inventory</h2>
+        <a href="/products/add" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Unit Price</th>
+                <th>Stock</th>
+                <th>Threshold</th>
+                <th>Image</th>
+                <th>Description</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product, stat : ${products}">
+                <td th:text="${stat.index + 1}">1</td>
+                <td th:text="${product.name}">Name</td>
+                <td th:text="${product.category}">Category</td>
+                <td th:text="${product.unitPrice}">0</td>
+                <td>
+                    <span th:text="${product.stockQuantity}">0</span>
+                    <span th:if="${product.stockQuantity <= product.stockThreshold}" class="badge bg-danger ms-2">Low Stock</span>
+                </td>
+                <td th:text="${product.stockThreshold}">5</td>
+                <td>
+                    <img th:src="@{/images/{img}(img=${product.image})}" alt="product"
+                         class="img-thumbnail" style="max-width: 80px;">
+                </td>
+                <td th:text="${product.description}">Description</td>
+                <td class="text-end">
+                    <a th:href="@{'/products/edit/' + ${product.id}}" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a th:href="@{'/products/delete/' + ${product.id}}"
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Are you sure you want to delete this product?');">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Toast container (bottom center) -->
+<div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1055">
+    <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="polite" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastContent">Placeholder</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- JS dependencies + toast logic -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const success = /*[[${success}]]*/ null;
+    const error = /*[[${error}]]*/ null;
+
+    const showToast = (message, type) => {
+      const toastEl = document.getElementById('toastMessage');
+      const toastContent = document.getElementById('toastContent');
+
+      toastContent.textContent = message;
+      toastEl.classList.remove('bg-success', 'bg-danger');
+      toastEl.classList.add(type === 'error' ? 'bg-danger' : 'bg-success');
+
+      const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+      toast.show();
+    };
+
+    if (success) showToast(success, 'success');
+    if (error) showToast(error, 'error');
+    /*]]>*/
+</script>
+
+</body>
+</html>
