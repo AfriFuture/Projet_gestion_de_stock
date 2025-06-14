@@ -1,11 +1,8 @@
 package com.app.gestionnaireDeStock.models;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
@@ -23,7 +20,7 @@ public class Product {
     private String name;
 
     @Column(name = "categorie")
-    private String category = "Unknown"; // valeur par défaut
+    private String category; // plus de valeur par défaut ici
 
     @NotNull(message = "Please enter the unit price.")
     @DecimalMin(value = "0.01", message = "Unit price must be greater than 0.")
@@ -33,14 +30,14 @@ public class Product {
     @NotNull(message = "Please enter the stock quantity.")
     @Min(value = 0, message = "Stock cannot be negative.")
     @Column(name = "quantite_en_stock")
-    private Integer stockQuantity = 0; // valeur par défaut
+    private Integer stockQuantity;
 
     @NotNull(message = "Please enter a stock threshold.")
     @Min(value = 1, message = "Threshold must be at least 1.")
     @Column(name = "seuil_stock")
-    private Integer stockThreshold = 5; // valeur par défaut
+    private Integer stockThreshold;
 
-    private String image = "default.png"; // image par défaut
+    private String image; // valeur définie côté backend si null
 
-    private String description = "No description available.";
+    private String description;
 }

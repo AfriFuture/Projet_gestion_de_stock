@@ -4,49 +4,110 @@
     <meta charset="UTF-8">
     <title>Orders</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container py-4">
-    <h1 class="mb-4">Orders</h1>
 
-    <a href="/orders/add" class="btn btn-primary mb-3">
-        <i class="bi bi-plus-circle"></i> New Order
-    </a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Orders</h2>
+        <a href="/orders/add" class="btn btn-primary">
+            <i class="bi bi-cart-plus"></i> New Order
+        </a>
+    </div>
 
-    <div th:if="${orders.empty}" class="alert alert-info">No orders available.</div>
+    <!-- Feedback -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div th:each="order : ${orders}" class="card mb-4 shadow-sm">
-        <div class="card-header bg-white">
-            <strong>Order #<span th:text="${order.id}">0</span></strong> —
-            <span th:text="${order.clientName}">Client</span>,
-            <small th:text="${order.orderDate}">Date</small>
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-sm table-hover mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Unit Price (FCFA)</th>
-                    <th>Subtotal (FCFA)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${order.items}">
-                    <td th:text="${item.product.name}">Product</td>
-                    <td th:text="${item.quantite}">1</td>
-                    <td th:text="${item.unitPrice}">0</td>
-                    <td th:text="${item.unitPrice.multiply(T(java.math.BigDecimal).valueOf(item.quantite))}">0</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer text-end">
-            <a th:href="@{'/factures/facture_' + ${order.id} + '.txt'}" class="btn btn-outline-dark btn-sm">
-                <i class="bi bi-download"></i> Download Invoice
-            </a>
+    <!-- Empty state -->
+    <div th:if="${orders.isEmpty()}">
+        <p>No orders have been placed yet.</p>
+    </div>
+
+    <!-- Orders table -->
+    <table th:if="${!orders.isEmpty()}" class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Date</th>
+            <th>Total (FCFA)</th>
+            <th class="text-end">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order, st : ${orders}">
+            <td th:text="${st.index + 1}">1</td>
+            <td th:text="${order.clientName}">Client</td>
+            <td th:text="${order.orderDate}">2025-06-14</td>
+            <td th:text="${order.totalAmount}">0.00</td>
+            <td class="text-end">
+                <!-- 👁️ View Details -->
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        data-bs-toggle="modal"
+                        th:data-bs-target="'#detailsModal' + ${order.id}">
+                    <i class="bi bi-eye"></i> View Details
+                </button>
+
+                <!-- 📄 View Invoice -->
+                <a th:href="@{'/factures/facture_' + ${order.id} + '.txt'}"
+                   target="_blank"
+                   class="btn btn-sm btn-outline-secondary ms-1">
+                    <i class="bi bi-file-text"></i> Invoice
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Order details modal -->
+    <div th:each="order : ${orders}">
+        <div class="modal fade" th:id="'detailsModal' + ${order.id}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Order Details - <span th:text="${order.clientName}">Client</span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Line Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td th:text="${item.product.name}">Product</td>
+                                <td th:text="${item.quantite}">1</td>
+                                <td th:text="${item.unitPrice}">1000</td>
+                                <td th:text="${item.lineTotal}">1000</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th th:text="${order.totalAmount}">0.00</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

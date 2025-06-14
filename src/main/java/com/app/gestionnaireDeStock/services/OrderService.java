@@ -57,24 +57,36 @@ public class OrderService {
 
     private void generateInvoice(Order order) {
         String filename = "factures/facture_" + order.getId() + ".txt";
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write("INVOICE #" + order.getId() + "\n");
+            writer.write("=========== INVOICE #" + order.getId() + " ===========\n");
             writer.write("Client: " + order.getClientName() + "\n");
             writer.write("Date: " + order.getOrderDate() + "\n\n");
-            writer.write(String.format("%-20s %-10s %-12s %-12s\n", "Product", "Qty", "UnitPrice", "Total"));
+
+            writer.write(String.format("%-26s %10s %15s %15s\n", "Product", "Qty", "Unit Price", "Line Total"));
+            writer.write("=".repeat(70) + "\n");
 
             BigDecimal total = BigDecimal.ZERO;
             for (OrderItem item : order.getItems()) {
+                String name = item.getProduct().getName();
+                if (name.length() > 25) {
+                    name = name.substring(0, 22) + "...";
+                }
+
                 BigDecimal lineTotal = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantite()));
-                writer.write(String.format("%-20s %-10d %-12.2f %-12.2f\n",
-                        item.getProduct().getName(),
+                total = total.add(lineTotal);
+
+                writer.write(String.format("%-26s %10d %15.2f %15.2f\n",
+                        name,
                         item.getQuantite(),
                         item.getUnitPrice(),
-                        lineTotal));
-                total = total.add(lineTotal);
+                        lineTotal
+                ));
             }
 
-            writer.write("\nTOTAL: " + total + " FCFA\n");
+            writer.write("=".repeat(70) + "\n");
+            writer.write(String.format("%-52s %15.2f FCFA\n", "TOTAL:", total));
+
         } catch (IOException e) {
             e.printStackTrace();
         }

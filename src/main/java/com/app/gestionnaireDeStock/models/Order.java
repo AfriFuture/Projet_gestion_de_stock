@@ -3,6 +3,7 @@ package com.app.gestionnaireDeStock.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,14 @@ public class Order {
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
 
+    public BigDecimal getTotalAmount() {
+        if (items == null || items.isEmpty()) return BigDecimal.ZERO;
+
+        return items.stream()
+                .filter(item -> item.getUnitPrice() != null && item.getQuantite() > 0)
+                .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantite())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
 
 }
