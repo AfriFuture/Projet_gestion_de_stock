@@ -64,6 +64,7 @@ public class ProductController {
             return "product-form";
         }
 
+        // Upload de l'image si fournie
         if (!file.isEmpty()) {
             try {
                 String uploadsDir = "uploads/";
@@ -79,6 +80,7 @@ public class ProductController {
             }
         }
 
+        // Défauts manquants
         if (product.getCategory() == null || product.getCategory().trim().isEmpty())
             product.setCategory("Unknown");
         if (product.getDescription() == null || product.getDescription().trim().isEmpty())

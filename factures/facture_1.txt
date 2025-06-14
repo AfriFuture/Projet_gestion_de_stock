@@ -1,8 +1,10 @@
-INVOICE #1
+=========== INVOICE #1 ===========
 Client: sddf2
 Date: 2025-06-14
+Status: Pending
 
-Product              Qty        UnitPrice    Total       
-Desk Lamp            4          12000,00     48000,00    
-
-TOTAL: 48000.00 FCFA
+Product                           Qty      Unit Price      Line Total
+======================================================================
+Desk Lamp                           2        12000,00        24000,00
+======================================================================
+TOTAL:                                                      24000,00 FCFA

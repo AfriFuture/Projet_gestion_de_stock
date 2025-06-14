@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/orders")
@@ -19,8 +20,15 @@ public class OrderController {
     @Autowired private ProductService productService;
 
     @GetMapping
-    public String listOrders(Model model) {
-        model.addAttribute("orders", orderService.getAll());
+    public String listOrders(@RequestParam(name = "status", required = false) String status, Model model) {
+        List<Order> orders = (status == null || status.isBlank())
+                ? orderService.getAll()
+                : orderService.getAll().stream()
+                .filter(o -> status.equalsIgnoreCase(o.getStatus()))
+                .toList();
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("selectedStatus", status);
         return "orders";
     }
 
@@ -34,7 +42,6 @@ public class OrderController {
         return "order-form";
     }
 
-
     @PostMapping("/save")
     public String saveOrder(@ModelAttribute Order order, RedirectAttributes redirect) {
         try {
@@ -47,5 +54,10 @@ public class OrderController {
         return "redirect:/orders";
     }
 
+    @GetMapping("/process/{id}")
+    public String markOrderAsProcessed(@PathVariable Long id, RedirectAttributes redirect) {
+        orderService.markAsProcessed(id);
+        redirect.addFlashAttribute("success", "Order marked as processed.");
+        return "redirect:/orders";
+    }
 }
-

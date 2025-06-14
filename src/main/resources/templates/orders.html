@@ -16,98 +16,90 @@
         </a>
     </div>
 
-    <!-- Feedback -->
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <!-- Filter -->
+    <form th:action="@{/orders}" method="get" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="Pending" th:selected="${selectedStatus == 'Pending'}">Pending</option>
+                <option value="Processed" th:selected="${selectedStatus == 'Processed'}">Processed</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-outline-primary">Filter</button>
+            <a href="/orders" class="btn btn-outline-secondary ms-2">Reset</a>
+        </div>
+    </form>
 
-    <!-- Empty state -->
+    <!-- Table -->
     <div th:if="${orders.isEmpty()}">
-        <p>No orders have been placed yet.</p>
+        <p>No orders found.</p>
     </div>
 
-    <!-- Orders table -->
     <table th:if="${!orders.isEmpty()}" class="table table-bordered table-hover align-middle">
         <thead class="table-light">
         <tr>
             <th>#</th>
             <th>Client</th>
             <th>Date</th>
-            <th>Total (FCFA)</th>
+            <th>Status</th>
+            <th>Total</th>
             <th class="text-end">Actions</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="order, st : ${orders}">
-            <td th:text="${st.index + 1}">1</td>
+        <tr th:each="order, stat : ${orders}">
+            <td th:text="${stat.index + 1}">1</td>
             <td th:text="${order.clientName}">Client</td>
             <td th:text="${order.orderDate}">2025-06-14</td>
-            <td th:text="${order.totalAmount}">0.00</td>
+            <td>
+                <span th:classappend="${order.status == 'Processed'} ? 'badge bg-success' : 'badge bg-warning text-dark'"
+                      th:text="${order.status}">Pending</span>
+            </td>
+            <td th:text="${order.totalAmount}">0</td>
             <td class="text-end">
-                <!-- 👁️ View Details -->
-                <button type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        data-bs-toggle="modal"
-                        th:data-bs-target="'#detailsModal' + ${order.id}">
-                    <i class="bi bi-eye"></i> View Details
-                </button>
+                <a th:href="@{'/factures/facture_' + ${order.id} + '.txt'}" target="_blank"
+                   class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="bi bi-file-earmark-text"></i> Invoice
+                </a>
 
-                <!-- 📄 View Invoice -->
-                <a th:href="@{'/factures/facture_' + ${order.id} + '.txt'}"
-                   target="_blank"
-                   class="btn btn-sm btn-outline-secondary ms-1">
-                    <i class="bi bi-file-text"></i> Invoice
+                <a th:if="${order.status != 'Processed'}"
+                   th:href="@{'/orders/process/' + ${order.id}}"
+                   class="btn btn-sm btn-outline-success me-1">
+                    <i class="bi bi-check-circle"></i> Mark as Processed
                 </a>
             </td>
         </tr>
         </tbody>
     </table>
-
-    <!-- Order details modal -->
-    <div th:each="order : ${orders}">
-        <div class="modal fade" th:id="'detailsModal' + ${order.id}" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Order Details - <span th:text="${order.clientName}">Client</span></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Unit Price</th>
-                                <th>Line Total</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="item : ${order.items}">
-                                <td th:text="${item.product.name}">Product</td>
-                                <td th:text="${item.quantite}">1</td>
-                                <td th:text="${item.unitPrice}">1000</td>
-                                <td th:text="${item.lineTotal}">1000</td>
-                            </tr>
-                            </tbody>
-                            <tfoot>
-                            <tr>
-                                <th colspan="3" class="text-end">Total:</th>
-                                <th th:text="${order.totalAmount}">0.00</th>
-                            </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Toast Message -->
+<div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1055">
+    <div id="toastMessage" class="toast text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastContent">Action successful</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const success = /*[[${success}]]*/ null;
+    const error = /*[[${error}]]*/ null;
+
+    const showToast = (msg, type) => {
+      const el = document.getElementById("toastMessage");
+      const body = document.getElementById("toastContent");
+      body.textContent = msg;
+      el.classList.remove("bg-success", "bg-danger");
+      el.classList.add(type === "error" ? "bg-danger" : "bg-success");
+      new bootstrap.Toast(el, { delay: 4000 }).show();
+    };
+
+    if (success) showToast(success, "success");
+    if (error) showToast(error, "error");
+</script>
 </body>
 </html>

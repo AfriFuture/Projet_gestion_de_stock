@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <title>Create Order</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .stock-warning { color: red; font-size: 0.875em; }
+        .stock-warning {
+            color: red;
+            font-size: 0.875em;
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -14,22 +19,18 @@
 
     <form id="orderForm" th:action="@{/orders/save}" th:object="${order}" method="post">
 
-        <!-- Messages -->
-        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">Please correct the errors below.</div>
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-        <!-- Client Name -->
-        <div class="mb-3">
-            <label class="form-label">Client Name</label>
-            <input type="text" class="form-control" th:field="*{clientName}" id="clientName" required />
-            <div class="invalid-feedback d-block" th:errors="*{clientName}"></div>
-        </div>
-
-        <h5 class="mb-3">Order Items</h5>
         <div class="alert alert-warning py-2 px-3" id="emptyWarning" style="display: none;">
             You must add at least one product to the order.
         </div>
 
+        <!-- Client -->
+        <div class="mb-3">
+            <label class="form-label">Client Name</label>
+            <input type="text" class="form-control" th:field="*{clientName}" id="clientName" required />
+        </div>
+
+        <h5 class="mb-3">Order Items</h5>
         <table class="table table-bordered align-middle" id="orderTable">
             <thead class="table-light">
             <tr>
@@ -60,7 +61,7 @@
 
 <!-- Modal confirmation -->
 <div class="modal fade" id="confirmModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Confirm Order</h5>
@@ -68,8 +69,23 @@
             </div>
             <div class="modal-body">
                 <p><strong>Client:</strong> <span id="modalClient"></span></p>
-                <p><strong>Items:</strong> <span id="modalLines"></span></p>
-                <p><strong>Estimated Total:</strong> <span id="modalTotal"></span> FCFA</p>
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody id="modalItems"></tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">TOTAL</th>
+                        <th><span id="modalTotal"></span> FCFA</th>
+                    </tr>
+                    </tfoot>
+                </table>
                 <p class="text-muted small">Are you sure you want to submit this order?</p>
             </div>
             <div class="modal-footer">
@@ -80,102 +96,134 @@
     </div>
 </div>
 
-<!-- JS -->
+<!-- Toast Message -->
+<div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1055">
+    <div id="toastMessage" class="toast text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastContent">Saved successfully</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     const products = /*[[${products}]]*/ [];
+    const success = /*[[${success}]]*/ null;
+    const error = /*[[${error}]]*/ null;
 </script>
 
 <script>
     let rowCount = 0;
 
+    function showToast(msg, type) {
+        const el = document.getElementById("toastMessage");
+        const body = document.getElementById("toastContent");
+        body.textContent = msg;
+        el.classList.remove("bg-success", "bg-danger");
+        el.classList.add(type === "error" ? "bg-danger" : "bg-success");
+        new bootstrap.Toast(el, { delay: 2000 }).show();
+    }
+
+    if (success) showToast(success, "success");
+    if (error) showToast(error, "error");
+
     function addRow() {
-      const tbody = document.getElementById("orderBody");
-      const row = document.createElement("tr");
+        const tbody = document.getElementById("orderBody");
+        const row = document.createElement("tr");
 
-      const options = products.map(p => `
-        <option value="${p.id}" data-stock="${p.stockQuantity}" data-price="${p.unitPrice}">
-          ${p.name}
-        </option>`).join("");
+        const options = products.map(p => `
+            <option value="${p.id}" data-stock="${p.stockQuantity}" data-price="${p.unitPrice}">
+                ${p.name}
+            </option>`).join("");
 
-      row.innerHTML = `
-        <td>
-          <select name="items[${rowCount}].product.id" class="form-select" onchange="updateRow(this)" required>
-            <option value="">-- Select --</option>
-            ${options}
-          </select>
-        </td>
-        <td class="stock-cell text-center">-</td>
-        <td class="price-cell text-center">-</td>
-        <td>
-          <input type="number" name="items[${rowCount}].quantite" class="form-control qty-field" min="0" value="0" oninput="checkStock(this)" required />
-          <div class="stock-warning" style="display: none;">Insufficient stock!</div>
-        </td>
-        <td class="text-center">
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">
-            &times;
-          </button>
-        </td>
-      `;
-      tbody.appendChild(row);
-      rowCount++;
+        row.innerHTML = `
+            <td>
+                <select name="items[${rowCount}].product.id" class="form-select" onchange="updateRow(this)" required>
+                    <option value="">-- Select --</option>
+                    ${options}
+                </select>
+            </td>
+            <td class="stock-cell text-center">-</td>
+            <td class="price-cell text-center">-</td>
+            <td>
+                <input type="number" name="items[${rowCount}].quantite" class="form-control qty-field"
+                       min="0" value="0" oninput="checkStock(this)" required />
+                <div class="stock-warning">Insufficient stock!</div>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">
+                    &times;
+                </button>
+            </td>`;
+        tbody.appendChild(row);
+        rowCount++;
     }
 
     function updateRow(select) {
-      const stock = select.options[select.selectedIndex].dataset.stock;
-      const price = select.options[select.selectedIndex].dataset.price;
-
-      const row = select.closest("tr");
-      row.querySelector(".stock-cell").textContent = stock || "-";
-      row.querySelector(".price-cell").textContent = price || "-";
-      row.querySelector(".qty-field").setAttribute("max", stock);
+        const stock = select.selectedOptions[0].dataset.stock || "-";
+        const price = select.selectedOptions[0].dataset.price || "-";
+        const row = select.closest("tr");
+        row.querySelector(".stock-cell").textContent = stock;
+        row.querySelector(".price-cell").textContent = price;
+        row.querySelector(".qty-field").setAttribute("max", stock);
     }
 
     function checkStock(input) {
-      const row = input.closest("tr");
-      const stock = parseInt(row.querySelector("select").selectedOptions[0].dataset.stock || "0");
-      const qty = parseInt(input.value || "0");
-      const warning = row.querySelector(".stock-warning");
-
-      warning.style.display = qty > stock ? "block" : "none";
+        const row = input.closest("tr");
+        const stock = parseInt(row.querySelector("select").selectedOptions[0].dataset.stock || "0");
+        const qty = parseInt(input.value || "0");
+        const warning = row.querySelector(".stock-warning");
+        warning.style.display = qty > stock ? "block" : "none";
     }
 
     function confirmOrder() {
-      const rows = document.querySelectorAll("#orderBody tr");
-      const clientName = document.getElementById("clientName").value.trim();
-      const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-      const warning = document.getElementById("emptyWarning");
+        const rows = document.querySelectorAll("#orderBody tr");
+        const client = document.getElementById("clientName").value.trim();
+        const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
+        const warning = document.getElementById("emptyWarning");
+        const modalBody = document.getElementById("modalItems");
 
-      let total = 0;
-      let count = 0;
+        let valid = 0;
+        let total = 0;
+        modalBody.innerHTML = "";
 
-      rows.forEach(row => {
-        const select = row.querySelector("select");
-        const qty = parseInt(row.querySelector("input").value || "0");
-        const price = parseFloat(select.selectedOptions[0]?.dataset.price || "0");
+        rows.forEach(row => {
+            const select = row.querySelector("select");
+            const qty = parseInt(row.querySelector("input").value || "0");
+            const price = parseFloat(select.selectedOptions[0]?.dataset.price || "0");
+            const name = select.selectedOptions[0]?.textContent;
 
-        if (select.value && qty > 0) {
-          count++;
-          total += price * qty;
+            if (select.value && qty > 0) {
+                valid++;
+                const line = price * qty;
+                total += line;
+
+                modalBody.innerHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td>${qty}</td>
+                        <td>${price.toFixed(2)}</td>
+                        <td>${line.toFixed(2)}</td>
+                    </tr>`;
+            }
+        });
+
+        if (valid === 0) {
+            warning.style.display = "block";
+            return;
         }
-      });
 
-      if (count === 0) {
-        warning.style.display = "block";
-        return;
-      }
-
-      warning.style.display = "none";
-      document.getElementById("modalClient").textContent = clientName || "N/A";
-      document.getElementById("modalLines").textContent = count;
-      document.getElementById("modalTotal").textContent = total.toFixed(2);
-      modal.show();
+        warning.style.display = "none";
+        document.getElementById("modalClient").textContent = client || "N/A";
+        document.getElementById("modalTotal").textContent = total.toFixed(2);
+        modal.show();
     }
 
     function submitConfirmedOrder() {
-      document.getElementById("orderForm").submit();
+        document.getElementById("orderForm").submit();
     }
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

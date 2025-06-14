@@ -1,8 +1,9 @@
-INVOICE #2
-Client: sddf1
+=========== INVOICE #2 ===========
+Client: sddf23
 Date: 2025-06-14
 
-Product              Qty        UnitPrice    Total       
-Mouse                25         7500,00      187500,00   
-
-TOTAL: 187500.00 FCFA
+Product                           Qty      Unit Price      Line Total
+======================================================================
+USB-C Charger                       2        12000,00        24000,00
+======================================================================
+TOTAL:                                                      24000,00 FCFA

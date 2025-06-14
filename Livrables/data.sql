@@ -1,4 +1,5 @@
 USE gestion_stock;
+
 INSERT INTO produit (nom, categorie, prix_unitaire, quantite_en_stock, image, description, seuil_stock) VALUES
 ('Laptop', 'Electronics', 350000, 10, 'laptop.jpg', '15-inch professional laptop', 5),
 ('Mouse', 'Accessories', 7500, 25, 'mouse.jpg', 'Wireless ergonomic mouse', 10),

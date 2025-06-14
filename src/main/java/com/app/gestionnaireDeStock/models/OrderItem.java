@@ -8,22 +8,32 @@ import java.math.BigDecimal;
 @Table(name = "ligne_commande")
 @Data
 public class OrderItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "id_commande")
     private Order order;
 
     @ManyToOne
+    @JoinColumn(name = "id_produit")
     private Product product;
 
-    private int quantite;
+    private Integer quantite;
+
+    @Column(name = "prix_unitaire")
     private BigDecimal unitPrice;
 
-    public BigDecimal getLineTotal() {
-        if (unitPrice == null || quantite <= 0) return BigDecimal.ZERO;
-        return unitPrice.multiply(BigDecimal.valueOf(quantite));
-    }
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
+
+    public int getQuantite() { return quantite; }
+    public void setQuantite(int quantite) { this.quantite = quantite; }
+
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public void setOrder(Order order) { this.order = order; }
+
 }

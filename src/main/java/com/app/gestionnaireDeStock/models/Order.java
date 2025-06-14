@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "commande")
 @Data
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +24,10 @@ public class Order {
     private LocalDate orderDate;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items  = new ArrayList<>();
+    private List<OrderItem> items = new ArrayList<>();
+
+    @Column(name = "statut")
+    private String status = "Pending";  // Valeur par défaut
 
     public Long getId() { return id; }
 
@@ -36,6 +40,9 @@ public class Order {
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
 
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
     public BigDecimal getTotalAmount() {
         if (items == null || items.isEmpty()) return BigDecimal.ZERO;
 
@@ -44,7 +51,4 @@ public class Order {
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantite())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
-
 }
-

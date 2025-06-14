@@ -40,4 +40,5 @@ public class Product {
     private String image; // valeur définie côté backend si null
 
     private String description;
+
 }

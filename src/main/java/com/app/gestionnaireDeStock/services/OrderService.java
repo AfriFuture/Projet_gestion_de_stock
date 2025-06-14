@@ -25,6 +25,7 @@ public class OrderService {
     @Transactional
     public Order createOrder(Order order) {
         order.setOrderDate(LocalDate.now());
+        order.setStatus("Pending"); // état initial
 
         if (order.getItems() == null || order.getItems().isEmpty()) {
             throw new IllegalArgumentException("At least one product must be selected.");
@@ -55,13 +56,30 @@ public class OrderService {
         return saved;
     }
 
+    public List<Order> getAll() {
+        return orderRepository.findAll();
+    }
+
+    public Order getById(Long id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+    public void markAsProcessed(Long orderId) {
+        Order order = getById(orderId);
+        if (order != null && !"Processed".equals(order.getStatus())) {
+            order.setStatus("Processed");
+            orderRepository.save(order);
+        }
+    }
+
     private void generateInvoice(Order order) {
         String filename = "factures/facture_" + order.getId() + ".txt";
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             writer.write("=========== INVOICE #" + order.getId() + " ===========\n");
             writer.write("Client: " + order.getClientName() + "\n");
-            writer.write("Date: " + order.getOrderDate() + "\n\n");
+            writer.write("Date: " + order.getOrderDate() + "\n");
+            writer.write("Status: " + order.getStatus() + "\n\n");
 
             writer.write(String.format("%-26s %10s %15s %15s\n", "Product", "Qty", "Unit Price", "Line Total"));
             writer.write("=".repeat(70) + "\n");
@@ -91,13 +109,4 @@ public class OrderService {
             e.printStackTrace();
         }
     }
-
-    public List<Order> getAll() {
-        return orderRepository.findAll();
-    }
-
-    public Order getById(Long id) {
-        return orderRepository.findById(id).orElse(null);
-    }
 }
-
