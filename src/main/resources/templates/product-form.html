@@ -2,72 +2,66 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Product Form</title>
+    <title>Formulaire Produit</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container py-4">
-    <h2 class="mb-4" th:text="${product.id == null} ? 'Add New Product' : 'Edit Product'">Product Form</h2>
+    <h2 class="mb-4" th:text="${product.id == null} ? 'Ajouter un produit' : 'Modifier le produit'">Produit</h2>
 
     <form th:action="@{/products/save}" method="post" enctype="multipart/form-data" th:object="${product}">
         <input type="hidden" th:field="*{id}"/>
 
-        <!-- Product Name -->
         <div class="mb-3">
-            <label class="form-label">Product Name *</label>
+            <label class="form-label">Nom du produit *</label>
             <input type="text" th:field="*{name}" class="form-control" required
-                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="Enter name" />
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="Entrer le nom" />
             <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
         </div>
 
-        <!-- Category -->
         <div class="mb-3">
-            <label class="form-label">Category</label>
+            <label class="form-label">Catégorie</label>
             <input type="text" th:field="*{category}" class="form-control"
-                   th:placeholder="${product.id == null} ? 'e.g. Electronics (default: Unknown)' : ''" />
+                   th:placeholder="${product.id == null} ? 'ex. Électronique (défaut : Inconnue)' : ''" />
         </div>
 
-        <!-- Unit Price -->
         <div class="mb-3">
-            <label class="form-label">Unit Price (FCFA) *</label>
+            <label class="form-label">Prix unitaire (FCFA) *</label>
             <input type="number" step="0.01" min="0" th:field="*{unitPrice}" class="form-control" required
                    th:classappend="${#fields.hasErrors('unitPrice')} ? 'is-invalid'" />
             <div class="invalid-feedback" th:if="${#fields.hasErrors('unitPrice')}" th:errors="*{unitPrice}"></div>
         </div>
 
-        <!-- Stock Quantity -->
         <div class="mb-3">
-            <label class="form-label">Stock Quantity *</label>
+            <label class="form-label">Quantité en stock *</label>
             <input type="number" min="0" th:field="*{stockQuantity}" class="form-control" required
                    th:classappend="${#fields.hasErrors('stockQuantity')} ? 'is-invalid'" />
             <div class="invalid-feedback" th:if="${#fields.hasErrors('stockQuantity')}" th:errors="*{stockQuantity}"></div>
         </div>
 
-        <!-- Stock Threshold -->
         <div class="mb-3">
-            <label class="form-label">Stock Threshold *</label>
+            <label class="form-label">Seuil de stock *</label>
             <input type="number" min="1" th:field="*{stockThreshold}" class="form-control" required
                    th:classappend="${#fields.hasErrors('stockThreshold')} ? 'is-invalid'" />
             <div class="invalid-feedback" th:if="${#fields.hasErrors('stockThreshold')}" th:errors="*{stockThreshold}"></div>
         </div>
 
-        <!-- Upload Image -->
         <div class="mb-3">
-            <label class="form-label">Product Image</label>
+            <label class="form-label">Image du produit</label>
             <input type="file" name="file" class="form-control" accept="image/*" />
         </div>
 
-        <!-- Description -->
         <div class="mb-3">
             <label class="form-label">Description</label>
             <textarea th:field="*{description}" class="form-control" rows="3"
-                      th:placeholder="${product.id == null} ? 'Optional description (default: No description available)' : ''"></textarea>
+                      th:placeholder="${product.id == null} ? 'Description optionnelle (défaut : Non spécifiée)' : ''"></textarea>
         </div>
 
         <div class="d-flex justify-content-end mt-4">
-            <a href="/products" class="btn btn-secondary me-2">Cancel</a>
+            <a href="/products" class="btn btn-secondary me-2">Annuler</a>
             <button type="submit" class="btn btn-success">
-                <i class="bi bi-check-circle"></i> Save Product
+                <i class="bi bi-check-circle"></i> Enregistrer
             </button>
         </div>
     </form>

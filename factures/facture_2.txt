@@ -1,9 +1,10 @@
-=========== INVOICE #2 ===========
-Client: sddf23
-Date: 2025-06-14
+=========== FACTURE #2 ===========
+Client : sddf2
+Date : 2025-06-16
+Statut : En attente
 
-Product                           Qty      Unit Price      Line Total
+Produit                           Qté   Prix Unitaire           Total
 ======================================================================
-USB-C Charger                       2        12000,00        24000,00
+Office Chair                        2        65000,00       130000,00
 ======================================================================
-TOTAL:                                                      24000,00 FCFA
+TOTAL :                                                    130000,00 FCFA

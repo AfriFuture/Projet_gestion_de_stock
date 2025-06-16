@@ -16,37 +16,40 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
-    @Autowired private OrderService orderService;
-    @Autowired private ProductService productService;
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private ProductService productService;
 
     @GetMapping
-    public String listOrders(@RequestParam(name = "status", required = false) String status, Model model) {
-        List<Order> orders = (status == null || status.isBlank())
+    public String afficherCommandes(@RequestParam(name = "status", required = false) String statut, Model model) {
+        List<Order> commandes = (statut == null || statut.isBlank())
                 ? orderService.getAll()
                 : orderService.getAll().stream()
-                .filter(o -> status.equalsIgnoreCase(o.getStatus()))
+                .filter(o -> statut.equalsIgnoreCase(o.getStatus()))
                 .toList();
 
-        model.addAttribute("orders", orders);
-        model.addAttribute("selectedStatus", status);
+        model.addAttribute("orders", commandes);
+        model.addAttribute("selectedStatus", statut);
         return "orders";
     }
 
     @GetMapping("/add")
-    public String showOrderForm(Model model) {
-        Order order = new Order();
-        order.setItems(new ArrayList<>());
+    public String afficherFormulaireCommande(Model model) {
+        Order commande = new Order();
+        commande.setItems(new ArrayList<>());
 
-        model.addAttribute("order", order);
+        model.addAttribute("order", commande);
         model.addAttribute("products", productService.getAll());
         return "order-form";
     }
 
     @PostMapping("/save")
-    public String saveOrder(@ModelAttribute Order order, RedirectAttributes redirect) {
+    public String enregistrerCommande(@ModelAttribute Order commande, RedirectAttributes redirect) {
         try {
-            orderService.createOrder(order);
-            redirect.addFlashAttribute("success", "Order created successfully!");
+            orderService.createOrder(commande);
+            redirect.addFlashAttribute("success", "Commande enregistrée avec succès !");
         } catch (IllegalArgumentException | IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/orders/add";
@@ -55,9 +58,9 @@ public class OrderController {
     }
 
     @GetMapping("/process/{id}")
-    public String markOrderAsProcessed(@PathVariable Long id, RedirectAttributes redirect) {
+    public String marquerCommandeCommeTraitee(@PathVariable Long id, RedirectAttributes redirect) {
         orderService.markAsProcessed(id);
-        redirect.addFlashAttribute("success", "Order marked as processed.");
+        redirect.addFlashAttribute("success", "Commande marquée comme traitée.");
         return "redirect:/orders";
     }
 }

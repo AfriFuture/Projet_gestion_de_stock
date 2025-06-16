@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Products</title>
+    <title>Produits</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
@@ -10,20 +10,19 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Product Inventory</h2>
+        <h2>Inventaire des Produits</h2>
         <a href="/products/add" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Product
+            <i class="bi bi-plus-circle"></i> Ajouter un produit
         </a>
     </div>
 
-    <!-- Filter form -->
     <form th:action="@{/products}" method="get" class="row g-2 mb-4">
         <div class="col-md-3">
-            <input type="text" name="name" class="form-control" th:value="${name}" placeholder="Search by name..." />
+            <input type="text" name="name" class="form-control" th:value="${name}" placeholder="Rechercher par nom..." />
         </div>
         <div class="col-md-3">
             <select name="category" class="form-select">
-                <option value="">All Categories</option>
+                <option value="">Toutes les catégories</option>
                 <option th:each="cat : ${categories}"
                         th:value="${cat}"
                         th:text="${cat}"
@@ -32,40 +31,39 @@
         </div>
         <div class="col-md-2">
             <input type="number" step="0.01" name="minPrice" class="form-control" th:value="${minPrice}"
-                   placeholder="Min price" />
+                   placeholder="Prix min" />
         </div>
         <div class="col-md-2">
             <input type="number" step="0.01" name="maxPrice" class="form-control" th:value="${maxPrice}"
-                   placeholder="Max price" />
+                   placeholder="Prix max" />
         </div>
         <div class="col-md-2">
             <select name="stockLevel" class="form-select">
-                <option value="">All Stock</option>
-                <option value="low" th:selected="${stockLevel == 'low'}">Low</option>
-                <option value="normal" th:selected="${stockLevel == 'normal'}">Normal</option>
+                <option value="">Tous les niveaux</option>
+                <option value="low" th:selected="${stockLevel == 'low'}">Stock faible</option>
+                <option value="normal" th:selected="${stockLevel == 'normal'}">Stock normal</option>
             </select>
         </div>
         <div class="col-12 text-end">
             <button type="submit" class="btn btn-outline-primary">
-                <i class="bi bi-funnel"></i> Filter
+                <i class="bi bi-funnel"></i> Filtrer
             </button>
             <a href="/products" class="btn btn-outline-secondary ms-2">
-                <i class="bi bi-x-circle"></i> Reset
+                <i class="bi bi-x-circle"></i> Réinitialiser
             </a>
         </div>
     </form>
 
-    <!-- Product table -->
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-light">
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
                 <th>Stock</th>
-                <th>Threshold</th>
+                <th>Seuil</th>
                 <th>Image</th>
                 <th>Description</th>
                 <th class="text-end">Actions</th>
@@ -74,17 +72,17 @@
             <tbody>
             <tr th:each="product, stat : ${products}">
                 <td th:text="${stat.index + 1}">1</td>
-                <td th:text="${product.name}">Name</td>
-                <td th:text="${product.category}">Category</td>
+                <td th:text="${product.name}">Nom</td>
+                <td th:text="${product.category}">Catégorie</td>
                 <td th:text="${product.unitPrice}">0</td>
                 <td>
                     <span th:text="${product.stockQuantity}">0</span>
-                    <span th:if="${product.stockQuantity <= product.stockThreshold}" class="badge bg-danger ms-1">Low</span>
+                    <span th:if="${product.stockQuantity <= product.stockThreshold}" class="badge bg-danger ms-1">Faible</span>
                     <span th:if="${product.stockQuantity > product.stockThreshold}" class="badge bg-success ms-1">Normal</span>
                 </td>
                 <td th:text="${product.stockThreshold}">5</td>
                 <td>
-                    <img th:src="@{'/uploads/' + ${product.image}}" alt="product"
+                    <img th:src="@{'/uploads/' + ${product.image}}" alt="produit"
                          class="img-thumbnail" style="max-width: 80px;" />
                 </td>
                 <td th:text="${product.description}">Description</td>
@@ -94,7 +92,7 @@
                     </a>
                     <a th:href="@{'/products/delete/' + ${product.id}}"
                        class="btn btn-sm btn-outline-danger"
-                       onclick="return confirm('Are you sure you want to delete this product?');">
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>
@@ -104,11 +102,10 @@
     </div>
 </div>
 
-<!-- Toast -->
 <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1055">
     <div id="toastMessage" class="toast text-white bg-success border-0" role="alert">
         <div class="d-flex">
-            <div class="toast-body" id="toastContent">Saved successfully</div>
+            <div class="toast-body" id="toastContent">Opération réussie</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
@@ -120,12 +117,12 @@
     const error = /*[[${error}]]*/ null;
 
     const showToast = (msg, type) => {
-      const el = document.getElementById("toastMessage");
-      const body = document.getElementById("toastContent");
-      body.textContent = msg;
-      el.classList.remove("bg-success", "bg-danger");
-      el.classList.add(type === "error" ? "bg-danger" : "bg-success");
-      new bootstrap.Toast(el, { delay: 4000 }).show();
+        const el = document.getElementById("toastMessage");
+        const body = document.getElementById("toastContent");
+        body.textContent = msg;
+        el.classList.remove("bg-success", "bg-danger");
+        el.classList.add(type === "error" ? "bg-danger" : "bg-success");
+        new bootstrap.Toast(el, { delay: 4000 }).show();
     };
 
     if (success) showToast(success, "success");

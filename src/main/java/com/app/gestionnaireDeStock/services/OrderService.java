@@ -25,10 +25,10 @@ public class OrderService {
     @Transactional
     public Order createOrder(Order order) {
         order.setOrderDate(LocalDate.now());
-        order.setStatus("Pending"); // état initial
+        order.setStatus("En attente");
 
         if (order.getItems() == null || order.getItems().isEmpty()) {
-            throw new IllegalArgumentException("At least one product must be selected.");
+            throw new IllegalArgumentException("Veuillez sélectionner au moins un produit.");
         }
 
         List<OrderItem> validItems = order.getItems().stream()
@@ -36,13 +36,13 @@ public class OrderService {
                 .toList();
 
         if (validItems.isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one product with quantity > 0.");
+            throw new IllegalArgumentException("La commande doit contenir au moins un produit avec une quantité > 0.");
         }
 
         for (OrderItem item : validItems) {
             Product product = productRepository.findById(item.getProduct().getId()).orElseThrow();
             if (product.getStockQuantity() < item.getQuantite()) {
-                throw new IllegalStateException("Insufficient stock for: " + product.getName());
+                throw new IllegalStateException("Stock insuffisant pour : " + product.getName());
             }
             product.setStockQuantity(product.getStockQuantity() - item.getQuantite());
             item.setUnitPrice(product.getUnitPrice());
@@ -66,8 +66,8 @@ public class OrderService {
 
     public void markAsProcessed(Long orderId) {
         Order order = getById(orderId);
-        if (order != null && !"Processed".equals(order.getStatus())) {
-            order.setStatus("Processed");
+        if (order != null && !"Traité".equals(order.getStatus())) {
+            order.setStatus("Traité");
             orderRepository.save(order);
         }
     }
@@ -76,12 +76,12 @@ public class OrderService {
         String filename = "factures/facture_" + order.getId() + ".txt";
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            writer.write("=========== INVOICE #" + order.getId() + " ===========\n");
-            writer.write("Client: " + order.getClientName() + "\n");
-            writer.write("Date: " + order.getOrderDate() + "\n");
-            writer.write("Status: " + order.getStatus() + "\n\n");
+            writer.write("=========== FACTURE #" + order.getId() + " ===========\n");
+            writer.write("Client : " + order.getClientName() + "\n");
+            writer.write("Date : " + order.getOrderDate() + "\n");
+            writer.write("Statut : " + order.getStatus() + "\n\n");
 
-            writer.write(String.format("%-26s %10s %15s %15s\n", "Product", "Qty", "Unit Price", "Line Total"));
+            writer.write(String.format("%-26s %10s %15s %15s\n", "Produit", "Qté", "Prix Unitaire", "Total"));
             writer.write("=".repeat(70) + "\n");
 
             BigDecimal total = BigDecimal.ZERO;
@@ -103,7 +103,7 @@ public class OrderService {
             }
 
             writer.write("=".repeat(70) + "\n");
-            writer.write(String.format("%-52s %15.2f FCFA\n", "TOTAL:", total));
+            writer.write(String.format("%-52s %15.2f FCFA\n", "TOTAL :", total));
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Orders</title>
+    <title>Commandes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
@@ -10,30 +10,28 @@
 <div class="container py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Orders</h2>
+        <h2>Liste des commandes</h2>
         <a href="/orders/add" class="btn btn-primary">
-            <i class="bi bi-cart-plus"></i> New Order
+            <i class="bi bi-cart-plus"></i> Nouvelle commande
         </a>
     </div>
 
-    <!-- Filter -->
     <form th:action="@{/orders}" method="get" class="row g-2 mb-3">
         <div class="col-md-3">
             <select name="status" class="form-select">
-                <option value="">All Status</option>
-                <option value="Pending" th:selected="${selectedStatus == 'Pending'}">Pending</option>
-                <option value="Processed" th:selected="${selectedStatus == 'Processed'}">Processed</option>
+                <option value="">Tous les statuts</option>
+                <option value="Pending" th:selected="${selectedStatus == 'Pending'}">En attente</option>
+                <option value="Processed" th:selected="${selectedStatus == 'Processed'}">Traité</option>
             </select>
         </div>
         <div class="col-md-3">
-            <button type="submit" class="btn btn-outline-primary">Filter</button>
-            <a href="/orders" class="btn btn-outline-secondary ms-2">Reset</a>
+            <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+            <a href="/orders" class="btn btn-outline-secondary ms-2">Réinitialiser</a>
         </div>
     </form>
 
-    <!-- Table -->
     <div th:if="${orders.isEmpty()}">
-        <p>No orders found.</p>
+        <p>Aucune commande trouvée.</p>
     </div>
 
     <table th:if="${!orders.isEmpty()}" class="table table-bordered table-hover align-middle">
@@ -42,8 +40,8 @@
             <th>#</th>
             <th>Client</th>
             <th>Date</th>
-            <th>Status</th>
-            <th>Total</th>
+            <th>Statut</th>
+            <th>Total (FCFA)</th>
             <th class="text-end">Actions</th>
         </tr>
         </thead>
@@ -54,19 +52,21 @@
             <td th:text="${order.orderDate}">2025-06-14</td>
             <td>
                 <span th:classappend="${order.status == 'Processed'} ? 'badge bg-success' : 'badge bg-warning text-dark'"
-                      th:text="${order.status}">Pending</span>
+                      th:text="${order.status == 'Processed' ? 'Traité' : 'En attente'}">
+                    En attente
+                </span>
             </td>
             <td th:text="${order.totalAmount}">0</td>
             <td class="text-end">
                 <a th:href="@{'/factures/facture_' + ${order.id} + '.txt'}" target="_blank"
                    class="btn btn-sm btn-outline-secondary me-2">
-                    <i class="bi bi-file-earmark-text"></i> Invoice
+                    <i class="bi bi-file-earmark-text"></i> Facture
                 </a>
 
                 <a th:if="${order.status != 'Processed'}"
                    th:href="@{'/orders/process/' + ${order.id}}"
                    class="btn btn-sm btn-outline-success me-1">
-                    <i class="bi bi-check-circle"></i> Mark as Processed
+                    <i class="bi bi-check-circle"></i> Marquer comme traité
                 </a>
             </td>
         </tr>
@@ -74,11 +74,10 @@
     </table>
 </div>
 
-<!-- Toast Message -->
 <div class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 1055">
     <div id="toastMessage" class="toast text-white bg-success border-0" role="alert">
         <div class="d-flex">
-            <div class="toast-body" id="toastContent">Action successful</div>
+            <div class="toast-body" id="toastContent">Action réussie</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
@@ -90,12 +89,12 @@
     const error = /*[[${error}]]*/ null;
 
     const showToast = (msg, type) => {
-      const el = document.getElementById("toastMessage");
-      const body = document.getElementById("toastContent");
-      body.textContent = msg;
-      el.classList.remove("bg-success", "bg-danger");
-      el.classList.add(type === "error" ? "bg-danger" : "bg-success");
-      new bootstrap.Toast(el, { delay: 4000 }).show();
+        const el = document.getElementById("toastMessage");
+        const body = document.getElementById("toastContent");
+        body.textContent = msg;
+        el.classList.remove("bg-success", "bg-danger");
+        el.classList.add(type === "error" ? "bg-danger" : "bg-success");
+        new bootstrap.Toast(el, { delay: 4000 }).show();
     };
 
     if (success) showToast(success, "success");

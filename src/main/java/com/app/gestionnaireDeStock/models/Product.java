@@ -15,30 +15,29 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Please enter a product name.")
+    @NotBlank(message = "Veuillez saisir un nom de produit.")
     @Column(name = "nom")
     private String name;
 
     @Column(name = "categorie")
-    private String category; // plus de valeur par défaut ici
+    private String category;
 
-    @NotNull(message = "Please enter the unit price.")
-    @DecimalMin(value = "0.01", message = "Unit price must be greater than 0.")
+    @NotNull(message = "Veuillez saisir le prix unitaire.")
+    @DecimalMin(value = "0.01", message = "Le prix unitaire doit être supérieur à 0.")
     @Column(name = "prix_unitaire")
     private BigDecimal unitPrice;
 
-    @NotNull(message = "Please enter the stock quantity.")
-    @Min(value = 0, message = "Stock cannot be negative.")
+    @NotNull(message = "Veuillez saisir la quantité en stock.")
+    @Min(value = 0, message = "La quantité en stock ne peut pas être négative.")
     @Column(name = "quantite_en_stock")
     private Integer stockQuantity;
 
-    @NotNull(message = "Please enter a stock threshold.")
-    @Min(value = 1, message = "Threshold must be at least 1.")
+    @NotNull(message = "Veuillez saisir un seuil de stock.")
+    @Min(value = 1, message = "Le seuil de stock doit être au moins égal à 1.")
     @Column(name = "seuil_stock")
     private Integer stockThreshold;
 
-    private String image; // valeur définie côté backend si null
+    private String image;
 
     private String description;
-
 }

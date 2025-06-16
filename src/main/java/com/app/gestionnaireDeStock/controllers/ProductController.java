@@ -25,7 +25,7 @@ public class ProductController {
     private ProductService service;
 
     @GetMapping
-    public String listProducts(
+    public String listerProduits(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "stockLevel", required = false) String stockLevel,
@@ -33,8 +33,8 @@ public class ProductController {
             @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
             Model model) {
 
-        List<Product> filtered = service.filterProducts(name, category, stockLevel, minPrice, maxPrice);
-        model.addAttribute("products", filtered);
+        List<Product> filtres = service.filterProducts(name, category, stockLevel, minPrice, maxPrice);
+        model.addAttribute("products", filtres);
         model.addAttribute("categories", service.getAllCategories());
         model.addAttribute("name", name);
         model.addAttribute("category", category);
@@ -46,13 +46,13 @@ public class ProductController {
     }
 
     @GetMapping("/add")
-    public String showForm(Model model) {
+    public String afficherFormulaireAjout(Model model) {
         model.addAttribute("product", new Product());
         return "product-form";
     }
 
     @PostMapping("/save")
-    public String saveProduct(
+    public String enregistrerProduit(
             @Valid @ModelAttribute("product") Product product,
             BindingResult result,
             @RequestParam("file") MultipartFile file,
@@ -64,50 +64,50 @@ public class ProductController {
             return "product-form";
         }
 
-        // Upload de l'image si fournie
+        // Upload de l’image si fournie
         if (!file.isEmpty()) {
             try {
-                String uploadsDir = "uploads/";
-                String originalName = Paths.get(file.getOriginalFilename()).getFileName().toString();
-                String newFilename = UUID.randomUUID() + "_" + originalName;
-                Path path = Paths.get(uploadsDir, newFilename);
-                Files.createDirectories(path.getParent());
-                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                product.setImage(newFilename);
+                String dossierUpload = "uploads/";
+                String nomOriginal = Paths.get(file.getOriginalFilename()).getFileName().toString();
+                String nomFichier = UUID.randomUUID() + "_" + nomOriginal;
+                Path chemin = Paths.get(dossierUpload, nomFichier);
+                Files.createDirectories(chemin.getParent());
+                Files.copy(file.getInputStream(), chemin, StandardCopyOption.REPLACE_EXISTING);
+                product.setImage(nomFichier);
             } catch (IOException e) {
-                redirect.addFlashAttribute("error", "Image upload failed.");
+                redirect.addFlashAttribute("error", "Échec du téléversement de l’image.");
                 return "redirect:/products";
             }
         }
 
-        // Défauts manquants
+        // Valeurs par défaut si absentes
         if (product.getCategory() == null || product.getCategory().trim().isEmpty())
-            product.setCategory("Unknown");
+            product.setCategory("Inconnue");
         if (product.getDescription() == null || product.getDescription().trim().isEmpty())
-            product.setDescription("No description available.");
+            product.setDescription("Aucune description fournie.");
         if (product.getImage() == null || product.getImage().trim().isEmpty())
             product.setImage("default.png");
         if (product.getStockThreshold() == null || product.getStockThreshold() < 1)
             product.setStockThreshold(5);
 
         service.save(product);
-        redirect.addFlashAttribute("success", "Product saved successfully.");
+        redirect.addFlashAttribute("success", "Produit enregistré avec succès.");
         return "redirect:/products";
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable Long id, Model model) {
+    public String modifierProduit(@PathVariable Long id, Model model) {
         model.addAttribute("product", service.getById(id));
         return "product-form";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable Long id, RedirectAttributes redirect) {
+    public String supprimerProduit(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             service.delete(id);
-            redirect.addFlashAttribute("success", "Product deleted successfully.");
+            redirect.addFlashAttribute("success", "Produit supprimé avec succès.");
         } catch (Exception e) {
-            redirect.addFlashAttribute("error", "Error deleting product.");
+            redirect.addFlashAttribute("error", "Erreur lors de la suppression du produit.");
         }
         return "redirect:/products";
     }

@@ -27,21 +27,7 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     @Column(name = "statut")
-    private String status = "Pending";  // Valeur par défaut
-
-    public Long getId() { return id; }
-
-    public String getClientName() { return clientName; }
-    public void setClientName(String clientName) { this.clientName = clientName; }
-
-    public LocalDate getOrderDate() { return orderDate; }
-    public void setOrderDate(LocalDate orderDate) { this.orderDate = orderDate; }
-
-    public List<OrderItem> getItems() { return items; }
-    public void setItems(List<OrderItem> items) { this.items = items; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    private String status = "En attente";
 
     public BigDecimal getTotalAmount() {
         if (items == null || items.isEmpty()) return BigDecimal.ZERO;
